@@ -11,6 +11,7 @@ use App\Models\Ticket;
 use Illuminate\Support\Facades\DB;
 use App\Mail\TicketPurchaseConfirmation;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class AttendeesController extends Controller
 {
@@ -19,11 +20,14 @@ class AttendeesController extends Controller
     public function index(Request $request)
     {
         //
-        // if ($request->ajax()) {
-        $attendees = User::role('attendee')->with('events')->get();
-        dd($attendees);
+        if ($request->ajax()) {
+            $attendees = User::whereHas('events', function ($query) {
+                $query->where('user_id', Auth::id());
+            })->with(['events.tickets'])->get();
+
+        // dd($attendees);
         return response()->json(['attendees' => $attendees]);
-        // }
+        }
         return view('attendees.index');
     }
 

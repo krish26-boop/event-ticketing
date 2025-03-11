@@ -16,57 +16,87 @@
 
     <h2>Attendees</h2>
     
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Tickets</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="eventList">
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Attendee Name</th>
+                    <th>Email</th>
+                    <th>Ticket Type</th>
+                    <th>Quantity</th>
+                    <th>Purchase Date</th>
+                </tr>
+            </thead>
+            <tbody id="attendeeList">
             <!-- Events will be loaded here via AJAX -->
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 @endsection
 
 @section('Scripts')
 <script>
     $(document).ready(function () {
-        loadEvents(); // Load events on page load
+    loadAttendees(); // Load Attendees on page load
 
-        function loadEvents() {
-            $.ajax({
-                url: "{{ route('events.index') }}",
-                type: "GET",
-                success: function (response) {                    
-                    let eventsHtml = "";
-                    $.each(response.events, function (index, event) {
-                        eventsHtml += `
-                            <tr id="eventRow-${event.id}">
-                                <td>${event.title}</td>
-                                <td>${event.description}</td>
-                                <td>${event.date}</td>
-                                <td>${event.location}</td>
-                                <td>${event.tickets_available}</td>
-                                <td>
-                                    <a href="{{ url('/events/${event.id}/edit') }}" class="btn btn-primary btn-sm">Edit</a>
-                                    <button onclick="deleteEvent(${event.id})" class="btn btn-danger btn-sm">Delete</button>
-                                </td>
+    function loadAttendees() {
+        $.ajax({
+            url: "{{ route('attendees.index') }}",
+            type: "GET",
+            success: function (response) {    
+                console.log(response);
+                                
+                let AttendeesHtml = "";
+                $.each(response.attendees, function (index, attendee) {
+                    if (attendee.events.length > 0) {
+                        $.each(attendee.events, function (eventIndex, event) {
+                            if (event.tickets.length > 0) {
+                                $.each(event.tickets, function (ticketIndex, ticket) {
+                                    AttendeesHtml += `
+                                        <tr id="attendeeRow-${attendee.id}">
+                                            <td>${index + 1}</td>
+                                            <td>${attendee.name}</td>
+                                            <td>${attendee.email}</td>
+                                            <td>${ticket.type}</td>
+                                            <td>${ticket.quantity}</td>
+                                            <td>${new Date(ticket.created_at).toLocaleDateString()}</td>
+                                        </tr>
+                                    `;
+                                });
+                            } else {
+                                // If no tickets exist for the event
+                                AttendeesHtml += `
+                                    <tr id="attendeeRow-${attendee.id}">
+                                        <td>${index + 1}</td>
+                                        <td>${attendee.name}</td>
+                                        <td>${attendee.email}</td>
+                                        <td colspan="3">No tickets available</td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    } else {
+                        // If no events exist for the attendee
+                        AttendeesHtml += `
+                            <tr id="attendeeRow-${attendee.id}">
+                                <td>${index + 1}</td>
+                                <td>${attendee.name}</td>
+                                <td>${attendee.email}</td>
+                                <td colspan="3">No events available</td>
                             </tr>
                         `;
-                    });
-                    $('#eventList').html(eventsHtml);
-                },
-                error: function () {
-                    alert("Error loading events.");
-                }
-            });
-        }
+                    }
+                });
+                $('#attendeeList').html(AttendeesHtml);
+            },
+            error: function () {
+                alert("Error loading Attendees.");
+            }
+        });
+    }
+
 
         window.deleteEvent = function (eventId) {
             if (confirm("Are you sure you want to delete this event?")) {
