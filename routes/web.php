@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'role:organizer'])->group(function () {
-    Route::resource('/events', EventController::class)->only(['index','create','store', 'update', 'destroy']);
+    Route::resource('/events', EventController::class)->only(['index','create','store','edit','update', 'destroy']);
     Route::resource('/tickets', TicketController::class);
     Route::get('/attendees', [AttendeesController::class, 'index'])->name('attendees.index');
 });
@@ -46,7 +46,7 @@ Route::middleware(['auth', 'role:attendee'])->group(function () {
     Route::resource('/events', EventController::class)->only(['show']);
     Route::get('/attendees/search', [AttendeesController::class, 'search']);
     Route::get('/attendees/upcoming', [AttendeesController::class, 'upcoming']);
-    Route::post('/comments', [CommentController::class, 'store']);
-    Route::get('/comments/{eventId}', [CommentController::class, 'getComments']);
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::get('/comments/{eventId}', [CommentController::class, 'getComments'])->name('comments.get');
     Route::post('/attendees/checkout', [AttendeesController::class, 'purchaseTickets']);
 });

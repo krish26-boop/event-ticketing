@@ -2,7 +2,11 @@
 
 @section('content')
 <div class="container">
-    <h2>View Event</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">View Event</h2>
+        <a class="btn btn-danger" href="{{ route('dashboard') }}">Back</a>
+    </div>
 
     <!-- Event Details -->
     <div class="card shadow-lg mb-4">
@@ -16,7 +20,7 @@
 
     <!-- Ticket Information -->
     <div class="card shadow-lg mb-4">
-        <div class="card-header bg-primary text-white">Tickets</div>
+        <div class="card-header bg-secondary text-white">Tickets</div>
         <div class="card-body">
             <table class="table table-bordered">
                 <thead>
@@ -56,7 +60,7 @@
             <div class="mb-3">
                 <textarea class="form-control" id="comment-text" rows="3" placeholder="Ask a question or leave a comment..."></textarea>
             </div>
-            <button class="btn btn-primary" onclick="submitComment()">Submit</button>
+            <button class="btn btn-success" onclick="submitComment()">Submit</button>
             @else
             <p><a href="{{ route('login') }}">Login</a> to leave a comment.</p>
             @endauth
@@ -64,17 +68,6 @@
             <div id="comments-section">
                 <!-- Comments will load here -->
             </div>
-            <!-- Sample Comments -->
-            <!-- <div class="mb-3">
-                    <strong>John Doe</strong>
-                    <p>Will there be parking available near the venue?</p>
-                    <small class="text-muted">2 hours ago</small>
-                </div>
-                <div class="mb-3">
-                    <strong>Jane Smith</strong>
-                    <p>Are outside food and drinks allowed?</p>
-                    <small class="text-muted">1 hour ago</small>
-                </div> -->
         </div>
     </div>
 
@@ -92,6 +85,7 @@
             <div class="modal-body">
                 <form id="checkout-form">
                     <input type="hidden" class="form-control" id="ticketId" readonly>
+                    <input type="hidden" class="form-control" id="eventId" value="{{ $event->id }}" readonly>
                     <div class="mb-3">
                         <label for="ticketType" class="form-label">Ticket Type</label>
                         <input type="text" class="form-control" id="ticketType" readonly>
@@ -113,6 +107,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="proceedToCheckout()">Proceed to Checkout</button>
+                <span id="checkoutLoader" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
             </div>
         </div>
     </div>
@@ -164,7 +159,7 @@
             });
     }
 
-    function showBuyTicketModal(id,type, price) {
+    function showBuyTicketModal(id, type, price) {
         document.getElementById("ticketId").value = id;
         document.getElementById("ticketType").value = type;
         document.getElementById("ticketPrice").value = price;
@@ -180,16 +175,17 @@
     }
 
     function proceedToCheckout() {
+        $('#checkoutLoader').show();
+        $('#checkoutButton').prop('disabled', true); // Disable button to prevent multiple clicks
         let formData = {
-            tickets: [
-                {
-            ticket_id: document.getElementById("ticketId").value,
-            ticket_type: document.getElementById("ticketType").value,
-            ticket_price: document.getElementById("ticketPrice").value,
-            ticket_quantity: document.getElementById("ticketQuantity").value,
-        } ]
-    };
-
+            tickets: [{
+                ticket_id: document.getElementById("ticketId").value,
+                event_id: document.getElementById("eventId").value,
+                ticket_type: document.getElementById("ticketType").value,
+                ticket_price: document.getElementById("ticketPrice").value,
+                ticket_quantity: document.getElementById("ticketQuantity").value,
+            }]
+        };
         fetch("{{ url('/attendees/checkout') }}", {
                 method: "POST",
                 headers: {
@@ -204,9 +200,14 @@
                     alert(data.error);
                 } else {
                     alert(data.message);
-                    // location.reload(); // Refresh page after successful checkout
                 }
-            }).catch(error => console.error('Error processing checkout:', error));
+                $('#buyTicketModal').modal('hide');
+            }).catch(error => console.error('Error processing checkout:', error))
+            .finally(() => {
+                // Hide loader after request completes
+                $('#checkoutLoader').hide();
+                $('#checkoutButton').prop('disabled', false);
+            });
     }
 </script>
 @endsection

@@ -11,4 +11,14 @@ class OrderItem extends Model
 
     protected $fillable = ['order_id', 'ticket_id', 'quantity','price'];
 
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class,'id');
+    }
+
 }

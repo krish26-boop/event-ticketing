@@ -16,7 +16,6 @@ class EventController extends Controller
         //
         if ($request->ajax()) {
             $events = Event::where('user_id', Auth::id())->get();
-            // return view('events.index',compact('events'));
             return response()->json(['events' => $events]);
         }
         return view('events.index');
@@ -37,18 +36,22 @@ class EventController extends Controller
     public function store(Request $request)
     {
         //
-        if ($request->ajax()) {
             $request->validate([
                 'title' => 'required',
                 'description' => 'required',
                 'date' => 'required|date|after:today',
                 'location' => 'required',
                 'tickets_available' => 'required|integer|min:1',
+                'early_price' => 'sometimes|numeric|min:0',
+                'early_quantity' => 'sometimes|integer|min:0',
+                'regular_price' => 'sometimes|numeric|min:0',
+                'regular_quantity' => 'sometimes|integer|min:0',
+                'vip_price' => 'sometimes|numeric|min:0',
+                'vip_quantity' => 'sometimes|integer|min:0',
             ]);
-            $event = auth()->user()->events()->create($request->all());
+            auth()->user()->events()->create($request->all());
             return response()->json(['message' => 'Event created successfully']);
-        }
-        // return redirect()->route('events.index')->with('success', 'Event created successfully');
+        
     }
 
     /**
@@ -58,8 +61,6 @@ class EventController extends Controller
     {
         //
         $event = $event->where(['events.id' => $event->id])->with('tickets')->first();
-        // dd($event);
-
         return view('events.show', compact('event'));
     }
 
@@ -68,8 +69,6 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
-        //
-        // $this->authorize('update', $event);
         $event = $event->where(['events.id' => $event->id])->with('tickets')->first();
         return view('events.edit', compact('event'));
     }
@@ -86,17 +85,17 @@ class EventController extends Controller
         // dd($request);
         // Validate the input data
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'tickets_available' => 'required|integer|min:1',
-            'early_price' => 'required|numeric|min:0',
-            'early_quantity' => 'required|integer|min:0',
-            'regular_price' => 'required|numeric|min:0',
-            'regular_quantity' => 'required|integer|min:0',
-            'vip_price' => 'required|numeric|min:0',
-            'vip_quantity' => 'required|integer|min:0',
+            'title' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'date' => 'sometimes|date',
+            'location' => 'sometimes|string|max:255',
+            'tickets_available' => 'sometimes|integer|min:1',
+            'early_price' => 'sometimes|numeric|min:0',
+            'early_quantity' => 'sometimes|integer|min:0',
+            'regular_price' => 'sometimes|numeric|min:0',
+            'regular_quantity' => 'sometimes|integer|min:0',
+            'vip_price' => 'sometimes|numeric|min:0',
+            'vip_quantity' => 'sometimes|integer|min:0',
         ]);
 
         // Update event details

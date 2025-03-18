@@ -16,7 +16,6 @@
 
     <h2>Manage Events</h2>
     
-    <button class="btn btn-success mb-3" onclick="loadEvents()">Refresh Events</button>
     <a href="{{ route('events.create') }}"  class="btn btn-success mb-3" >
                    Create Events
                 </a>
@@ -58,7 +57,7 @@
                                 <td>${event.location}</td>
                                 <td>${event.tickets_available}</td>
                                 <td>
-                                    <a href="{{ url('/events/${event.id}/edit') }}" class="btn btn-primary btn-sm">Edit</a>
+                                    <a href="{{ url('/events/${event.id}/edit') }}" class="btn btn-warning btn-sm">Edit</a>
                                     <button onclick="deleteEvent(${event.id})" class="btn btn-danger btn-sm">Delete</button>
                                 </td>
                             </tr>

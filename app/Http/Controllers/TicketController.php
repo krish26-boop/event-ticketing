@@ -16,7 +16,6 @@ class TicketController extends Controller
         //
         if ($request->ajax()) {
             $tickets = Ticket::where('user_id', Auth::id())->get(); 
-            // return view('tickets.index',compact('tickets'));
             return response()->json(['tickets' => $tickets]);
         }
         return view('tickets.index');

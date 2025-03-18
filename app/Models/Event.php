@@ -21,6 +21,11 @@ class Event extends Model
         return $this->hasMany(Ticket::class);
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);

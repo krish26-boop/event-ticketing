@@ -24,6 +24,11 @@
         </div>
         <div class="mb-3">
             <label for="tickets_available">Available Tickets</label>
+            <select class="form-control" name="tickets_available" id="tickets_available">
+                <option value="">Select Ticket Available</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
             <input type="number" id="tickets_available" name="tickets_available" class="form-control">
         </div>
         <button type="submit" class="btn btn-primary">Create Event</button>

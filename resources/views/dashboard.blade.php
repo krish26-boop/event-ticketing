@@ -4,17 +4,27 @@
 
 @section('content')
 <h1>Welcome, {{ auth()->user()->name }}!</h1>
-<p>Your role: {{ auth()->user()->getRoleNames() }}</p>
+<p class="mb-4">Your role: {{ auth()->user()->getRoleNames()->first() }}</p>
 
 @role('attendee')
-<h2>Upcoming Events</h2>
-<table class="table">
+<h2 class="mb-3 ">Upcoming Events</h2>
+
+<form id="searchForm" class="mb-3">
+    <input type="text" class="me-2" id="searchKeyword" name="keyword" placeholder="Search by keyword">
+    <input type="text" class="me-2" id="searchLocation" name="location" placeholder="Search by location">
+    <input type="date" class="me-3" id="searchDate" name="date">
+    <button type="submit"  class="btn btn-success">Search</button>
+    <button type="reset"  class="btn btn-danger" onclick="fetchEvents()">Reset</button>
+</form>
+
+
+<table class="table mb-5">
   <thead>
     <tr>
-      <th scope="col">Title</th>
-      <th scope="col">Date</th>
-      <th scope="col">Location</th>
-      <th scope="col">Action</th>
+      <th class="bg-info" scope="col">Title</th>
+      <th class="bg-info" scope="col">Date</th>
+      <th class="bg-info" scope="col">Location</th>
+      <th class="bg-info" scope="col">Action</th>
     </tr>
   </thead>
   <tbody id="upcomingEvents">
@@ -22,54 +32,50 @@
   </table>
 <!-- <div id="upcomingEvents"></div> -->
 
-<input type="text" id="searchKeyword" placeholder="Search events...">
-<input type="text" id="searchLocation" placeholder="Enter location...">
-<input type="date" id="searchDate">
-<button id="searchBtn">Search</button>
+
 <div id="eventResults"></div>
 
 @section('Scripts')
 <script>
-       $('#searchBtn').on('click', function() {
-        let keyword = $('#searchKeyword').val();
-        let location = $('#searchLocation').val();
-        let date = $('#searchDate').val();
-
+    $(document).ready(function () {
+        window.fetchEvents = function (data = {}) {
         $.ajax({
-            url: "{{ url('/attendees/search') }}",
+            url: "{{ url('/attendees/upcoming') }}",
             method: 'GET',
-            data: { keyword, location, date },
-            success: function(response) {
+            data: data,
+            success: function (response) {
                 let eventsHtml = '';
-                response.data.forEach(event => {
-                    eventsHtml += `<div>
-                        <h3>${event.title}</h3>
-                        <p>${event.description}</p>
-                        <p><strong>Location:</strong> ${event.location}</p>
-                        <p><strong>Date:</strong> ${event.date}</p>
-                    </div>`;
-                });
-                $('#eventResults').html(eventsHtml);
+                if (response.data.length > 0) {
+                    response.data.forEach(event => {
+                        eventsHtml += `<tr>
+                            <td><h3>${event.title}</h3></td>
+                            <td><p>${event.date}</p></td>
+                            <td><p>${event.location}</p></td>
+                            <td><a href="{{ url('/events/${event.id}') }}" class="btn btn-dark">View</a></td>
+                        </tr>`;
+                    });
+                } else {
+                    eventsHtml = `<tr><td colspan="4">No events found</td></tr>`;
+                }
+                $('#upcomingEvents').html(eventsHtml);
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
             }
         });
-    });
+    }
 
-   $.ajax({
-        url: "{{ url('/attendees/upcoming') }}",
-        method: 'GET',
-        success: function(response) {            
-            let eventsHtml = '';
-            response.data.forEach(event => {
-                eventsHtml += `<tr>
-                    <td><h3>${event.title}</h3></td>
-                    <td><p>${event.date}</p></td>
-                    <td><p>${event.location}</p></td>
-                    <td><a href="{{ url('/events/${event.id}') }}">View</a></td>
-                </tr>`;
-            });
-            $('#upcomingEvents').html(eventsHtml);
-        }
+    // Fetch all events on page load
+    fetchEvents();
+
+    // Search button click event
+    $('#searchForm').on('submit', function (e) {
+        e.preventDefault();
+        let formData = $(this).serialize();
+        fetchEvents(formData);
     });
+});
+
 </script>
 @endsection
 @endrole

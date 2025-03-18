@@ -24,7 +24,8 @@ class LoginRegisterController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:6',
+            'password_confirmation' => 'required|same:password',
             'role' => 'required|in:organizer,attendee',
         ]);
 
